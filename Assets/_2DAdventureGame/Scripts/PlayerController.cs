@@ -4,10 +4,10 @@ using UnityEngine.InputSystem;
 public class PlayerController : MonoBehaviour
 {
     public InputAction MoveAction;
-    public InputAction LaunchAction;                    // НОВЕ
-    public GameObject projectilePrefab;                 // НОВЕ
+    public InputAction LaunchAction;
+    public InputAction TalkAction;
+    public GameObject projectilePrefab;
 
-    // --- Швидкість і здоров'я ---
     public float speed = 3.0f;
     public int maxHealth = 5;
     public float timeInvincible = 2.0f;
@@ -24,10 +24,13 @@ public class PlayerController : MonoBehaviour
     Animator animator;
     Vector2 moveDirection = new Vector2(1, 0);
 
+    NonPlayerCharacter lastNonPlayerCharacter;
+
     void Start()
     {
         MoveAction.Enable();
-        LaunchAction.Enable();                          // НОВЕ
+        LaunchAction.Enable();
+        TalkAction.Enable();
         rigidbody2d = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
         currentHealth = maxHealth;
@@ -56,16 +59,18 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        if (LaunchAction.WasPressedThisFrame())         // НОВЕ
+        if (LaunchAction.WasPressedThisFrame())
         {
             Launch();
         }
+
+        CheckForNPC();
     }
 
     void FixedUpdate()
     {
         Vector2 position = (Vector2)rigidbody2d.position
-            + move * speed * Time.deltaTime;
+            + move * speed * Time.fixedDeltaTime;
         rigidbody2d.MovePosition(position);
     }
 
@@ -83,10 +88,11 @@ public class PlayerController : MonoBehaviour
         }
 
         currentHealth = Mathf.Clamp(currentHealth + amount, 0, maxHealth);
-        Debug.Log(currentHealth + "/" + maxHealth);
+        // (float) — щоб ділення було дробовим: 2 / 5.0 = 0.4, а не 0
+        UIHandler.instance.SetHealthValue(currentHealth / (float)maxHealth);
     }
 
-    void Launch()                                       // НОВЕ
+    void Launch()
     {
         GameObject projectileObject = Instantiate(
             projectilePrefab,
@@ -97,5 +103,42 @@ public class PlayerController : MonoBehaviour
         projectile.Launch(moveDirection, 300);
 
         animator.SetTrigger("Launch");
+    }
+
+    // Промінь у напрямку погляду робота: чи є попереду NPC
+    void CheckForNPC()
+    {
+        RaycastHit2D hit = Physics2D.Raycast(
+            rigidbody2d.position + Vector2.up * 0.2f,
+            moveDirection, 1.5f, LayerMask.GetMask("NPC"));
+
+        NonPlayerCharacter npc = null;
+        if (hit.collider != null)
+        {
+            npc = hit.collider.GetComponent<NonPlayerCharacter>();
+        }
+
+        // Дивимося вже не на того NPC — ховаємо стару бульбашку
+        if (lastNonPlayerCharacter != null && lastNonPlayerCharacter != npc)
+        {
+            lastNonPlayerCharacter.dialogueBubble.SetActive(false);
+            lastNonPlayerCharacter = null;
+        }
+
+        if (npc != null)
+        {
+            npc.dialogueBubble.SetActive(true);
+            lastNonPlayerCharacter = npc;
+            FindFriend();
+        }
+    }
+
+    // Натиснули X, коли дивимося на NPC — показуємо репліку
+    void FindFriend()
+    {
+        if (TalkAction.WasPressedThisFrame())
+        {
+            UIHandler.instance.DisplayDialogue();
+        }
     }
 }

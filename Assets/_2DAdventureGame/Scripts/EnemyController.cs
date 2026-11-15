@@ -12,6 +12,9 @@ public class EnemyController : MonoBehaviour
     int direction = 1;
     bool broken = true;
 
+    // Для GameManager: чи ворог ще зламаний
+    public bool isBroken { get { return broken; } }
+
     void Start()
     {
         rigidbody2d = GetComponent<Rigidbody2D>();
