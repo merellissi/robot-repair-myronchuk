@@ -129,16 +129,16 @@ public class PlayerController : MonoBehaviour
         {
             npc.dialogueBubble.SetActive(true);
             lastNonPlayerCharacter = npc;
-            FindFriend();
+            FindFriend(npc); // ЗМІНЕНО: передаємо, з яким NPC говоримо
         }
     }
 
-    // Натиснули X, коли дивимося на NPC — показуємо репліку
-    void FindFriend()
+    // ЗМІНЕНО: отримує NPC і показує саме його репліку
+    void FindFriend(NonPlayerCharacter npc)
     {
         if (TalkAction.WasPressedThisFrame())
         {
-            UIHandler.instance.DisplayDialogue();
+            UIHandler.instance.DisplayDialogue(npc.dialogueText);
         }
     }
 }

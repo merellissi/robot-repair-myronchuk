@@ -48,8 +48,10 @@ public class UIHandler : MonoBehaviour
         m_Healthbar.style.width = Length.Percent(100 * percentage);
     }
 
-    public void DisplayDialogue()
+    // Показує вікно репліки з текстом конкретного NPC
+    public void DisplayDialogue(string text)
     {
+        m_NonPlayerDialogue.Q<Label>().text = text;
         m_NonPlayerDialogue.style.display = DisplayStyle.Flex;
         m_TimerDisplay = displayTime;
     }
