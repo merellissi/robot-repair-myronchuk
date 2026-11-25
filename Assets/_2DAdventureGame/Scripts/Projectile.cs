@@ -31,7 +31,7 @@ public class Projectile : MonoBehaviour
             enemy.Fix();
         }
 
-        Debug.Log("Снаряд влучив у " + other.gameObject);
+        
         Destroy(gameObject);
     }
 }
