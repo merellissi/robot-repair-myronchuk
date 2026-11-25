@@ -1,0 +1,7 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement style="flex-grow: 1; background-color: rgb(45, 35, 40); justify-content: center; align-items: center;">
+        <ui:Label text="Оранжерея роботів" style="font-size: 80px; color: rgb(255, 255, 255); -unity-font-style: bold; margin-bottom: 30px;" />
+        <ui:Label text="Полагодь усіх чотирьох роботів шестернями, поки вода не затопила оранжерею" style="font-size: 34px; color: rgb(255, 225, 140); white-space: normal; -unity-text-align: middle-center; max-width: 80%; margin-bottom: 50px;" />
+        <ui:Button name="StartButton" text="Почати" style="font-size: 44px; width: 320px; height: 100px;" />
+    </ui:VisualElement>
+</ui:UXML>
