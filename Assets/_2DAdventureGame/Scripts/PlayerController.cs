@@ -12,6 +12,9 @@ public class PlayerController : MonoBehaviour
     public int maxHealth = 5;
     public float timeInvincible = 2.0f;
 
+    public AudioClip hitClip;
+    public AudioClip healClip;
+
     public int health { get { return currentHealth; } }
 
     int currentHealth;
@@ -22,6 +25,7 @@ public class PlayerController : MonoBehaviour
     Vector2 move;
 
     Animator animator;
+    AudioSource audioSource;
     Vector2 moveDirection = new Vector2(1, 0);
 
     NonPlayerCharacter lastNonPlayerCharacter;
@@ -33,6 +37,7 @@ public class PlayerController : MonoBehaviour
         TalkAction.Enable();
         rigidbody2d = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
+        audioSource = GetComponent<AudioSource>();
         currentHealth = maxHealth;
     }
 
@@ -85,11 +90,23 @@ public class PlayerController : MonoBehaviour
             isInvincible = true;
             damageCooldown = timeInvincible;
             animator.SetTrigger("Hit");
+            PlaySound(hitClip);
+        }
+        else if (amount > 0)
+        {
+            PlaySound(healClip);
         }
 
         currentHealth = Mathf.Clamp(currentHealth + amount, 0, maxHealth);
-        // (float) — щоб ділення було дробовим: 2 / 5.0 = 0.4, а не 0
         UIHandler.instance.SetHealthValue(currentHealth / (float)maxHealth);
+    }
+
+    public void PlaySound(AudioClip clip)
+    {
+        if (audioSource != null && clip != null)
+        {
+            audioSource.PlayOneShot(clip);
+        }
     }
 
     void Launch()
@@ -105,7 +122,6 @@ public class PlayerController : MonoBehaviour
         animator.SetTrigger("Launch");
     }
 
-    // Промінь у напрямку погляду робота: чи є попереду NPC
     void CheckForNPC()
     {
         RaycastHit2D hit = Physics2D.Raycast(
@@ -118,7 +134,6 @@ public class PlayerController : MonoBehaviour
             npc = hit.collider.GetComponent<NonPlayerCharacter>();
         }
 
-        // Дивимося вже не на того NPC — ховаємо стару бульбашку
         if (lastNonPlayerCharacter != null && lastNonPlayerCharacter != npc)
         {
             lastNonPlayerCharacter.dialogueBubble.SetActive(false);
@@ -129,11 +144,10 @@ public class PlayerController : MonoBehaviour
         {
             npc.dialogueBubble.SetActive(true);
             lastNonPlayerCharacter = npc;
-            FindFriend(npc); // ЗМІНЕНО: передаємо, з яким NPC говоримо
+            FindFriend(npc);
         }
     }
 
-    // ЗМІНЕНО: отримує NPC і показує саме його репліку
     void FindFriend(NonPlayerCharacter npc)
     {
         if (TalkAction.WasPressedThisFrame())
